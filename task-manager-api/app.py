@@ -1,34 +1,57 @@
-from flask import Flask
+from flask import Flask, jsonify
 from flask_cors import CORS
+
+from config import Config
 from database import db
-from routes.task_routes import task_bp
-from routes.user_routes import user_bp
-from routes.report_routes import report_bp
-import os, sys, json, datetime
+from services.errors import DomainError
+from utils.time import utcnow
+from utils.logger import get_logger
 
-app = Flask(__name__)
+logger = get_logger(__name__)
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///tasks.db'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['SECRET_KEY'] = 'super-secret-key-123'
 
-CORS(app)
-db.init_app(app)
+def create_app(config_object=Config):
+    """Bootstrap: cria o app, injeta config, registra blueprints e handlers."""
+    app = Flask(__name__)
+    app.config.from_object(config_object)
 
-app.register_blueprint(task_bp)
-app.register_blueprint(user_bp)
-app.register_blueprint(report_bp)
+    CORS(app)
+    db.init_app(app)
 
-@app.route('/health')
-def health():
-    return {'status': 'ok', 'timestamp': str(datetime.datetime.now())}
+    from routes.task_routes import task_bp
+    from routes.user_routes import user_bp
+    from routes.report_routes import report_bp
 
-@app.route('/')
-def index():
-    return {'message': 'Task Manager API', 'version': '1.0'}
+    app.register_blueprint(task_bp)
+    app.register_blueprint(user_bp)
+    app.register_blueprint(report_bp)
 
-with app.app_context():
-    db.create_all()
+    @app.route('/health')
+    def health():
+        return {'status': 'ok', 'timestamp': str(utcnow())}
+
+    @app.route('/')
+    def index():
+        return {'message': 'Task Manager API', 'version': '1.0'}
+
+    # Tratamento de erro centralizado (RP-09 corrige AP-09).
+    @app.errorhandler(DomainError)
+    def handle_domain_error(err):
+        return jsonify({'error': err.message}), err.status
+
+    @app.errorhandler(Exception)
+    def handle_unexpected(err):
+        db.session.rollback()
+        logger.exception('unexpected_error')
+        return jsonify({'error': 'Erro interno'}), 500
+
+    with app.app_context():
+        db.create_all()
+
+    return app
+
+
+app = create_app()
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)
