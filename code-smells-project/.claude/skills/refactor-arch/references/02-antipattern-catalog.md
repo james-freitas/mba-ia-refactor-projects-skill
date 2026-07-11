@@ -4,14 +4,17 @@ Catálogo agnóstico de stack. Cada anti-pattern tem **id**, **severidade**,
 **descrição**, **sinais de detecção** (com padrões de busca por linguagem) e
 **por que importa**. Na Fase 2, percorra **todos** e registre as ocorrências.
 
-## Escala de severidade
+## Definição de Severidades
 
-| Nível | Critério | Ação |
-|-------|----------|------|
-| 🔴 CRITICAL | Exploração remota, perda/vazamento de dados, comprometimento total | Corrigir sempre, primeiro |
-| 🟠 HIGH | Falha de segurança séria ou defeito arquitetural que trava evolução | Corrigir |
-| 🟡 MEDIUM | Impacto de performance/manutenção relevante | Corrigir na refatoração |
-| 🔵 LOW | Qualidade/legibilidade; risco baixo | Corrigir se barato |
+Escala de classificação baseada em problemas de **MVC e SOLID**. Use-a para
+padronizar a auditoria e os relatórios gerados:
+
+| Nível | Definição | Exemplos | Ação |
+|-------|-----------|----------|------|
+| 🔴 CRITICAL | Falhas graves de arquitetura ou segurança que impedem o funcionamento correto, expõem dados sensíveis ou violam completamente a separação de responsabilidades | Credenciais hardcoded; SQL Injection; "God Class" contendo banco de dados, lógicas complexas e roteamento no mesmo arquivo | Corrigir sempre, primeiro |
+| 🟠 HIGH | Fortes violações do padrão MVC ou princípios SOLID que dificultam muito a manutenção e testes | Lógicas de negócio pesadas presas dentro de Controllers; forte acoplamento sem Injeção de Dependência; estado global mutável em toda a aplicação | Corrigir |
+| 🟡 MEDIUM | Problemas de padronização, duplicação de código ou gargalos de performance moderada | Queries N+1 no banco de dados; uso inadequado de middlewares; validações ausentes nas rotas | Corrigir na refatoração |
+| 🔵 LOW | Melhorias de legibilidade, nomenclatura de variáveis ruins, ou "magic numbers" soltos pelo código | Variáveis de uma letra; números mágicos em regras; formatação inconsistente | Corrigir se barato |
 
 Distribuição do catálogo: **AP-01, AP-02 → CRITICAL**; **AP-03, AP-04, AP-05 →
 HIGH**; **AP-06, AP-07, AP-08, AP-09 → MEDIUM**; **AP-10, AP-11, AP-12, AP-13 →

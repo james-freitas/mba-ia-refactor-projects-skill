@@ -45,18 +45,20 @@ memória — as heurísticas, catálogo e exemplos vivem nesses arquivos:
 3. **Mapeie a arquitetura atual**: localize o ponto de entrada, rotas,
    controllers, models, services, repositories e configuração. Classifique cada
    arquivo pela responsabilidade que ele realmente exerce (não pelo nome/pasta).
-4. **Imprima um resumo** para o usuário no formato:
+4. **Imprima um resumo** para o usuário exatamente neste formato de banner:
 
    ```
-   ## Fase 1 — Análise
-   Stack:        <linguagem> + <framework> (<gerenciador de deps>)
-   Banco:        <db> via <driver/ORM>
-   Entrypoint:   <arquivo>
-   Camadas encontradas:
-     - Apresentação: <arquivos>
-     - Negócio:      <arquivos ou "AUSENTE">
-     - Dados:        <arquivos ou "misturado com X">
-   Observação inicial: <1-2 linhas sobre o nível de acoplamento>
+   ================================
+   PHASE 1: PROJECT ANALYSIS
+   ================================
+   Language:      <linguagem + versão se detectável>
+   Framework:     <framework + versão>
+   Dependencies:  <deps relevantes além do framework>
+   Domain:        <domínio do sistema (ex.: E-commerce API — produtos, pedidos, usuários)>
+   Architecture:  <ex.: Monolítica — tudo em N arquivos, sem separação de camadas>
+   Source files:  <N> files analyzed
+   DB tables:     <tabelas/coleções encontradas>
+   ================================
    ```
 
 5. Siga direto para a Fase 2 (a análise não pausa).
@@ -80,9 +82,9 @@ relatório e **parar para pedir confirmação**. Ainda sem modificar nada.
 5. **PARE.** Apresente o relatório e faça a pergunta de confirmação (use a
    ferramenta de pergunta ao usuário quando disponível):
 
+   > Phase 2 complete. Proceed with refactoring (Phase 3)?
    > A Fase 3 vai **modificar arquivos** para reestruturar o projeto em MVC.
-   > Deseja prosseguir? Posso aplicar **tudo**, apenas **CRITICAL/HIGH**, ou
-   > **cancelar**.
+   > Posso aplicar **tudo**, apenas **CRITICAL/HIGH**, ou **cancelar**.
 
    **Não prossiga** para a Fase 3 sem resposta afirmativa. Se o usuário limitar
    o escopo (ex.: só CRITICAL/HIGH), respeite-o na Fase 3.
@@ -114,9 +116,32 @@ funcionando**. Só entra aqui após o "sim" da Fase 2.
      status HTTP e payloads coerentes com o comportamento original.
    - Se algo quebrar, corrija antes de declarar sucesso; se não conseguir,
      reverta a mudança que causou a regressão e reporte.
-6. **Imprima o relatório final:** o que mudou, a estrutura nova de pastas, os
-   anti-patterns resolvidos (e os deixados de fora, se o escopo foi limitado) e
-   a evidência de validação (saída do boot + respostas dos endpoints).
+6. **Imprima o relatório final** exatamente neste formato de banner (após a
+   estrutura e a validação, liste o que mudou, os anti-patterns resolvidos e os
+   deixados de fora se o escopo foi limitado):
+
+   ```
+   ================================
+   PHASE 3: REFACTORING COMPLETE
+   ================================
+   New Project Structure:
+   src/
+   ├── config/<...>
+   ├── models/<...>
+   ├── views/<...>
+   ├── controllers/<...>
+   ├── <demais camadas criadas>
+   └── app.<ext> (composition root)
+
+   Validation
+     ✓ Application boots without errors
+     ✓ All endpoints respond correctly
+     ✓ <anti-patterns restantes: "Zero anti-patterns remaining" ou lista do que ficou fora do escopo>
+   ================================
+   ```
+
+   Use `✓` apenas para checagens realmente executadas e aprovadas; se algo
+   falhou ou não foi verificado, marque com `✗` e explique.
 
 ---
 
